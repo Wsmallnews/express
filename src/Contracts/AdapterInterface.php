@@ -7,15 +7,12 @@ namespace Wsmallnews\Express\Contracts;
  */
 interface AdapterInterface
 {
-
-
     /**
      * 获取当前驱动名
      *
      * @return string
      */
     // public function getType(): string;
-
 
     // /**
     //  * 查询物流轨迹
@@ -25,7 +22,6 @@ interface AdapterInterface
     //  */
     // public function query($params);
 
-
     // /**
     //  * 发货
     //  *
@@ -33,7 +29,6 @@ interface AdapterInterface
     //  * @return array
     //  */
     // public function send($params): array;
-
 
     // /**
     //  * 取消发货
@@ -44,7 +39,6 @@ interface AdapterInterface
     //  */
     // public function cancel($package, $params): bool;
 
-
     // /**
     //  * 修改物流发货
     //  *
@@ -54,7 +48,6 @@ interface AdapterInterface
     //  */
     // public function change($package, $params): array;
 
-
     // /**
     //  * 物流轨迹订阅
     //  *
@@ -63,7 +56,6 @@ interface AdapterInterface
     //  */
     // public function subscribe($params): bool;
 
-
     // /**
     //  * 轨迹推送通知信息处理
     //  *
@@ -71,7 +63,6 @@ interface AdapterInterface
     //  * @return array
     //  */
     // public function notifyTraces($message): array;
-
 
     // /**
     //  * 轨迹推送通知返回结果

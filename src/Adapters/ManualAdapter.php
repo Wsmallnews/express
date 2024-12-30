@@ -7,11 +7,8 @@ use Wsmallnews\Express\Exceptions\ExpressException;
 
 class ManualAdapter implements AdapterInterface
 {
-
     /**
      * 配置数组
-     *
-     * @var array
      */
     public array $config = [];
 
@@ -20,41 +17,31 @@ class ManualAdapter implements AdapterInterface
         $this->config = $config;
     }
 
-
     /**
      * 获取当前驱动名
-     *
-     * @return string
      */
     public function getType(): string
     {
         return 'manual';
     }
 
-
-
     /**
      * 查询物流轨迹
      *
-     * @param array $params
-     * @return array
+     * @param  array  $params
      */
     public function query($params): array
     {
         throw new ExpressException('@sn todo 手动发货，暂时不支持快递查询');
-
         $tracesData = [];
 
         return $tracesData;
     }
 
-
-
     /**
      * 发货
      *
-     * @param array $params
-     * @return array
+     * @param  array  $params
      */
     public function send($params): array
     {
@@ -62,7 +49,7 @@ class ManualAdapter implements AdapterInterface
         $express_code = $params['express_code'] ?? '';
         $express_no = $params['express_no'] ?? '';
 
-        if (!$express_name || !$express_code || !$express_no) {
+        if (! $express_name || ! $express_code || ! $express_no) {
             throw new ExpressException('请填写正确的快递单号');
         }
 
@@ -70,18 +57,15 @@ class ManualAdapter implements AdapterInterface
             'express_name' => $express_name,
             'express_code' => $express_code,
             'express_no' => $express_no,
-            'ext' => []
+            'ext' => [],
         ];
     }
-
-
 
     /**
      * 取消发货
      *
-     * @param \think\Model|array $package
-     * @param array $params
-     * @return boolean
+     * @param  \think\Model|array  $package
+     * @param  array  $params
      */
     public function cancel($package, $params): bool
     {
@@ -90,14 +74,11 @@ class ManualAdapter implements AdapterInterface
         return true;
     }
 
-
-
     /**
      * 修改物流发货
      *
-     * @param \think\Model|array $package
-     * @param array $params
-     * @return array
+     * @param  \think\Model|array  $package
+     * @param  array  $params
      */
     public function change($package, $params): array
     {
@@ -105,7 +86,7 @@ class ManualAdapter implements AdapterInterface
         $express_code = $params['express_code'] ?? '';
         $express_no = $params['express_no'] ?? '';
 
-        if (!$express_name || !$express_code || !$express_no) {
+        if (! $express_name || ! $express_code || ! $express_no) {
             throw new ExpressException('请填写正确的快递单号');
         }
 
@@ -113,16 +94,14 @@ class ManualAdapter implements AdapterInterface
             'express_name' => $express_name,
             'express_code' => $express_code,
             'express_no' => $express_no,
-            'ext' => []
+            'ext' => [],
         ];
     }
-
 
     /**
      * 物流轨迹订阅
      *
-     * @param array $params
-     * @return boolean
+     * @param  array  $params
      */
     public function subscribe($params): bool
     {
@@ -131,12 +110,10 @@ class ManualAdapter implements AdapterInterface
         return true;
     }
 
-
     /**
      * 轨迹推送通知信息处理
      *
-     * @param array $message
-     * @return array
+     * @param  array  $message
      */
     public function notifyTraces($message): array
     {
@@ -145,12 +122,11 @@ class ManualAdapter implements AdapterInterface
         return [];
     }
 
-
     /**
      * 物流推送结果处理
      *
-     * @param boolean $success
-     * @param string $reason
+     * @param  bool  $success
+     * @param  string  $reason
      * @return mixed
      */
     public function getNotifyResponse($data = [])

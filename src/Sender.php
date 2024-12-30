@@ -3,7 +3,6 @@
 namespace Wsmallnews\Express;
 
 use Wsmallnews\Express\Contracts\AdapterInterface;
-use Wsmallnews\Express\Exceptions\ExpressException;
 
 // use think\Collection;
 // use addons\estore\package\support\{
@@ -19,15 +18,12 @@ use Wsmallnews\Express\Exceptions\ExpressException;
 
 class Sender
 {
-
-
     /**
      * adapter
      *
      * @var AdapterInterface
      */
     protected $adapter = null;
-
 
     /**
      * expresser 要发货的实体
@@ -36,17 +32,14 @@ class Sender
      */
     protected $expresser = null;
 
-
-    public function __construct(AdapterInterface $adapter = null)
+    public function __construct(?AdapterInterface $adapter = null)
     {
         $this->adapter = $adapter;
     }
 
-
     /**
      * 设置本次要发货的实体
      *
-     * @param ExpressableInterface $expresser
      * @return self
      */
     public function setExpresser(ExpressableInterface $expresser)
@@ -65,11 +58,10 @@ class Sender
         return $this;
     }
 
-
     /**
      * 直接查询 通过快递公司和物流单号查询
      *
-     * @param array $params
+     * @param  array  $params
      * @return array
      */
     public function query($params)
@@ -84,12 +76,10 @@ class Sender
         return $tracesData;
     }
 
-
-
     /**
      * 发货
      *
-     * @param array $params
+     * @param  array  $params
      * @return \think\Model
      */
     public function send($params)
@@ -108,13 +98,13 @@ class Sender
         // 调用 adapter 发货
         $result = $this->adapter->send($params);
 
-        $packageManager = (new PackageManager())->setScopeInfo($this->getScopeType(), $this->getStoreId())
+        $packageManager = (new PackageManager)->setScopeInfo($this->getScopeType(), $this->getStoreId())
             ->setTableInfo($this->getTableType(), $this->getTableId());
         // 添加快递包裹
         $package = $packageManager->setExpressInfo([
             'express_name' => $result['express_name'] ?? '',
             'express_code' => $result['express_code'],
-            'express_no' => $result['express_no'] ?? ''
+            'express_no' => $result['express_no'] ?? '',
         ])->save([
             'user_id' => $user_id,
             'driver' => $this->adapter->getType(),
@@ -131,14 +121,11 @@ class Sender
         return $package;
     }
 
-
-
-
     /**
      * 取消运单
      *
-     * @param \think\Model $package
-     * @param array $params
+     * @param  \think\Model  $package
+     * @param  array  $params
      * @return void
      */
     public function cancel($package, $params)
@@ -155,13 +142,11 @@ class Sender
         $package->delete();
     }
 
-
-
     /**
      * 更改运单
      *
-     * @param \think\Model $package
-     * @param array $params
+     * @param  \think\Model  $package
+     * @param  array  $params
      * @return \think\Model
      */
     public function change($package, $params)
@@ -177,14 +162,14 @@ class Sender
         // 调用 adapter 发货
         $result = $this->adapter->change($package, $params);
 
-        $packageManager = (new PackageManager())->setScopeInfo($this->getScopeType(), $this->getStoreId())
+        $packageManager = (new PackageManager)->setScopeInfo($this->getScopeType(), $this->getStoreId())
             ->setTableInfo($this->getTableType(), $this->getTableId());
 
         // 更新包裹快递单号信息
         $package = $packageManager->setExpressInfo([
             'express_name' => $result['express_name'] ?? '',
             'express_code' => $result['express_code'],
-            'express_no' => $result['express_no'] ?? ''
+            'express_no' => $result['express_no'] ?? '',
         ])->update($package, [
             'ext' => $result['ext'] ?? [],        // 需要存库的 ext 信息
         ]);
@@ -192,12 +177,10 @@ class Sender
         return $package;
     }
 
-
-
     /**
      * 轨迹订阅
      *
-     * @param array $params     ['express_code', 'express_no']
+     * @param  array  $params  ['express_code', 'express_no']
      * @return void
      */
     public function subscribe($params)
@@ -210,13 +193,11 @@ class Sender
         $result = $this->adapter->subscribe($params);
     }
 
-
-
     /**
      * 查询并更新 物流轨迹
      *
-     * @param \think\Model $package
-     * @param array $params
+     * @param  \think\Model  $package
+     * @param  array  $params
      * @return \think\Model
      */
     public function queryUpdateTraces($package, $params = [])
@@ -230,7 +211,7 @@ class Sender
         // 调用 adapter 获取最新物流信息
         $tracesData = $this->adapter->query($params);
 
-        $packageManager = (new PackageManager())->setScopeInfo($this->getScopeType(), $this->getStoreId())
+        $packageManager = (new PackageManager)->setScopeInfo($this->getScopeType(), $this->getStoreId())
             ->setTableInfo($this->getTableType(), $this->getTableId());
 
         // 更新包裹快递单号信息
@@ -239,13 +220,10 @@ class Sender
         return $package;
     }
 
-
-
-
     /**
      * notify 通知更新物流轨迹
      *
-     * @param array $message
+     * @param  array  $message
      * @return \think\Model
      */
     public function notifyUpdateTraces($message)
@@ -259,10 +237,11 @@ class Sender
             $express_no = $tracesData['express_no'];
             $extra = $tracesData['extra'] ?? [];
 
-            $packageManager = new PackageManager();
+            $packageManager = new PackageManager;
             $package = $packageManager->getPackageByExpressInfo($express_code, $express_no, $extra);
-            if (!$package) {
+            if (! $package) {
                 \think\Log::error('package-notfund: ' . json_encode($message));
+
                 continue;
             }
 
@@ -276,14 +255,12 @@ class Sender
             'packages' => $packages,
             'adapter_result' => $this->adapter->getNotifyResponse([     // 各个适配器自己需要的响应结果
                 'traces_datas' => $tracesDatas,
-                'packages' => $packages
+                'packages' => $packages,
             ]),
         ];
 
         return $result;
     }
-
-
 
     // 在线打印电子面单 （打印电子面单使用 微信的）
     // public function printEOrder($params)

@@ -3,7 +3,6 @@
 namespace Wsmallnews\Express\Adapters;
 
 use Wsmallnews\Express\Contracts\AdapterInterface;
-use Wsmallnews\Express\Exceptions\ExpressException;
 
 // use Wsmallnews\Express\Exceptions\delivery\{
 //     service\KdniaoService,
@@ -12,56 +11,52 @@ use Wsmallnews\Express\Exceptions\ExpressException;
 
 class KdniaoAdapter implements AdapterInterface
 {
-
     public $status = [
         '0' => 'noinfo',
         '10' => 'waiting',
         '1' => 'collect',
         '2' => 'transport',
-            '201' => 'transport',               // 到达派件城市
-            '202' => 'delivery',                // 派件中
-            '204' => 'transport',               // 到达转运中心
-            '205' => 'transport',               // 到达派件网点
-            '206' => 'transport',               // 寄件网点发件
-            '211' => 'delivery',                // 已放入快递柜或驿站
+        '201' => 'transport',               // 到达派件城市
+        '202' => 'delivery',                // 派件中
+        '204' => 'transport',               // 到达转运中心
+        '205' => 'transport',               // 到达派件网点
+        '206' => 'transport',               // 寄件网点发件
+        '211' => 'delivery',                // 已放入快递柜或驿站
         '3' => 'signfor',
-            '301' => 'signfor',                 // 正常签收
-            '302' => 'signfor',                 // 轨迹异常后最终签收
-            '304' => 'signfor',                 // 代收签收
-            '311' => 'signfor',                 // 快递柜或驿站签收
+        '301' => 'signfor',                 // 正常签收
+        '302' => 'signfor',                 // 轨迹异常后最终签收
+        '304' => 'signfor',                 // 代收签收
+        '311' => 'signfor',                 // 快递柜或驿站签收
         '4' => 'difficulty',                    // 问题件
-            '401' => 'invalid',                 // 发货无信息
-            '402' => 'timeout',                 // 超时未签收
-            '403' => 'timeout',                 // 超时未更新
-            '404' => 'refuse',                  // 拒收(退件)
-            '405' => 'difficulty',              // 派件异常
-            '406' => 'difficulty',              // 退货签收
-            '407' => 'difficulty',              // 退货未签收
-            '412' => 'difficulty',              // 快递柜或驿站超时未取
-            '413' => 'difficulty',              // 单号已拦截
-            '414' => 'difficulty',              // 破损
-            '415' => 'difficulty',              // 客户取消发货
-            '416' => 'difficulty',              // 无法联系
-            '417' => 'difficulty',              // 配送延迟
-            '418' => 'difficulty',              // 快件取出
-            '419' => 'difficulty',              // 重新派送
-            '420' => 'difficulty',              // 收货地址不详细
-            '421' => 'difficulty',              // 收件人电话错误
-            '422' => 'difficulty',              // 错分件
-            '423' => 'difficulty',              // 超区件
+        '401' => 'invalid',                 // 发货无信息
+        '402' => 'timeout',                 // 超时未签收
+        '403' => 'timeout',                 // 超时未更新
+        '404' => 'refuse',                  // 拒收(退件)
+        '405' => 'difficulty',              // 派件异常
+        '406' => 'difficulty',              // 退货签收
+        '407' => 'difficulty',              // 退货未签收
+        '412' => 'difficulty',              // 快递柜或驿站超时未取
+        '413' => 'difficulty',              // 单号已拦截
+        '414' => 'difficulty',              // 破损
+        '415' => 'difficulty',              // 客户取消发货
+        '416' => 'difficulty',              // 无法联系
+        '417' => 'difficulty',              // 配送延迟
+        '418' => 'difficulty',              // 快件取出
+        '419' => 'difficulty',              // 重新派送
+        '420' => 'difficulty',              // 收货地址不详细
+        '421' => 'difficulty',              // 收件人电话错误
+        '422' => 'difficulty',              // 错分件
+        '423' => 'difficulty',              // 超区件
         '5' => 'sendon',                        // 转寄
         '6' => 'customs_clearance',             // 清关
-            '601' => 'waiting_customs_clearance',   // 待清关
-            '602' => 'ing_customs_clearance',   // 清关中
-            '603' => 'customs_clearanced',      // 已清关
-            '604' => 'customs_clearance_err'    // 清关异常
+        '601' => 'waiting_customs_clearance',   // 待清关
+        '602' => 'ing_customs_clearance',   // 清关中
+        '603' => 'customs_clearanced',      // 已清关
+        '604' => 'customs_clearance_err',    // 清关异常
     ];
-
 
     /**
      * 配置数组
-     *
-     * @var array
      */
     public array $config = [];
 
@@ -79,25 +74,18 @@ class KdniaoAdapter implements AdapterInterface
         $this->service = new KdniaoService($config);
     }
 
-
-
     /**
      * 获取当前驱动名
-     *
-     * @return string
      */
     public function getType(): string
     {
         return 'kdniao';
     }
 
-
-
     /**
      * 查询物流轨迹
      *
-     * @param array $params
-     * @return array
+     * @param  array  $params
      */
     public function query($params): array
     {
@@ -106,7 +94,7 @@ class KdniaoAdapter implements AdapterInterface
 
         $kdniaoParams = [
             'ShipperCode' => $params['express_code'],
-            'LogisticCode' => $params['express_no']
+            'LogisticCode' => $params['express_no'],
         ];
 
         if ($params['express_code'] == 'SF') {
@@ -126,7 +114,7 @@ class KdniaoAdapter implements AdapterInterface
         // 格式化结果
         $tracesData = $this->formatTraces([
             'status' => $status,
-            'traces' => $traces
+            'traces' => $traces,
         ]);
 
         $tracesData['express_code'] = $params['express_code'];
@@ -135,12 +123,10 @@ class KdniaoAdapter implements AdapterInterface
         return $tracesData;
     }
 
-
     /**
      * 发货
      *
-     * @param array $params
-     * @return array
+     * @param  array  $params
      */
     public function send($params): array
     {
@@ -157,22 +143,22 @@ class KdniaoAdapter implements AdapterInterface
         // 运单基础信息
         $kdniaoParams = [
             // 下面五个参数对应快递鸟的五个参数  https://www.yuque.com/kdnjishuzhichi/dfcrg1/hrfw43
-            "CustomerName" => $this->config['customer_name'],
-            "CustomerPwd" => $this->config['customer_pwd'],
-            "MonthCode" => $this->config['month_code'],
-            "SendSite" => $this->config['send_site'],
-            "SendStaff" => $this->config['send_staff'],
+            'CustomerName' => $this->config['customer_name'],
+            'CustomerPwd' => $this->config['customer_pwd'],
+            'MonthCode' => $this->config['month_code'],
+            'SendSite' => $this->config['send_site'],
+            'SendStaff' => $this->config['send_staff'],
 
-            "ShipperCode" => $this->config['express']['code'] ?? '',
-            "OrderCode" => $params['unique_id'],   // 唯一 id
+            'ShipperCode' => $this->config['express']['code'] ?? '',
+            'OrderCode' => $params['unique_id'],   // 唯一 id
 
-            "PayType" => $this->config['pay_type'],
+            'PayType' => $this->config['pay_type'],
 
-            "ExpType" => $this->config['exp_type'],
-            "IsReturnPrintTemplate" => 0,   //返回打印面单模板
-            "TemplateSize" => '130',        // 一联单
-            "Volume" => 0,
-            "Remark" => $params['remark'] ?? ($baseInfo['remark'] ?? '贵重物品，小心轻放')  // 备注
+            'ExpType' => $this->config['exp_type'],
+            'IsReturnPrintTemplate' => 0,   //返回打印面单模板
+            'TemplateSize' => '130',        // 一联单
+            'Volume' => 0,
+            'Remark' => $params['remark'] ?? ($baseInfo['remark'] ?? '贵重物品，小心轻放'),  // 备注
         ];
 
         // 接收人信息
@@ -194,14 +180,11 @@ class KdniaoAdapter implements AdapterInterface
         return $this->formatSendResponse($params, $result);
     }
 
-
-
     /**
      * 取消发货
      *
-     * @param \think\Model|array $package
-     * @param array $params
-     * @return boolean
+     * @param  \think\Model|array  $package
+     * @param  array  $params
      */
     public function cancel($package, $params): bool
     {
@@ -230,30 +213,24 @@ class KdniaoAdapter implements AdapterInterface
         return true;
     }
 
-
-
     /**
      * 修改物流发货
      *
-     * @param \think\Model|array $package
-     * @param array $params
-     * @return array
+     * @param  \think\Model|array  $package
+     * @param  array  $params
      */
     public function change($package, $params): array
     {
         throw new DeliveryException('该发货单已被推送第三方平台，请取消后重新发货');
-
         // @sn todo 后续这里可以先调用 cancel, 然后在调用 send
 
         return [];
     }
 
-
     /**
      * 物流轨迹订阅
      *
-     * @param array $params
-     * @return boolean
+     * @param  array  $params
      */
     public function subscribe($params): bool
     {
@@ -262,7 +239,7 @@ class KdniaoAdapter implements AdapterInterface
 
         $kdniaoParams = [
             'ShipperCode' => $params['express_code'],
-            'LogisticCode' => $params['express_no']
+            'LogisticCode' => $params['express_no'],
         ];
 
         if ($params['express_code'] == 'SF') {
@@ -280,13 +257,10 @@ class KdniaoAdapter implements AdapterInterface
         return true;
     }
 
-
-
     /**
      * 轨迹推送通知信息处理
      *
-     * @param array $message
-     * @return array
+     * @param  array  $message
      */
     public function notifyTraces($message): array
     {
@@ -297,11 +271,11 @@ class KdniaoAdapter implements AdapterInterface
 
         $tracesDatas = [];
         foreach ($expressData as $key => $express) {
-            if (!$express['Success']) {
+            if (! $express['Success']) {
                 \think\Log::error('kdniao_delivery_push_error:' . json_encode($express));
 
                 // 失败了
-                if (isset($express['Reason']) && (strpos($express['Reason'], '三天无轨迹') !== false  || strpos($express['Reason'], '七天内无轨迹变化') !== false)) {
+                if (isset($express['Reason']) && (strpos($express['Reason'], '三天无轨迹') !== false || strpos($express['Reason'], '七天内无轨迹变化') !== false)) {
                     // 需要重新订阅
                     \think\Log::error('kdniao_delivery_need_resubscribe:' . json_encode($express));
 
@@ -311,6 +285,7 @@ class KdniaoAdapter implements AdapterInterface
                     //     'express_no' => $express['LogisticCode']
                     // ]);
                 }
+
                 continue;
             }
 
@@ -320,14 +295,14 @@ class KdniaoAdapter implements AdapterInterface
             // 格式化结果
             $currentTraces = $this->formatTraces([
                 'status' => $status,
-                'traces' => $traces
+                'traces' => $traces,
             ]);
             $currentTraces['express_code'] = $express['ShipperCode'];
             $currentTraces['express_no'] = $express['LogisticCode'];
             if (isset($express['OrderCode']) && $express['OrderCode']) {        // kdniao 接口文档不保证一定有 OrderCode
                 $currentTraces['extra'] = [
                     // 包裹额外信息，更加精确查询包裹时用，和 发货时候 formatSendResponse 方法组装的 ext 字段相对应
-                    'order_code' => $express['OrderCode']
+                    'order_code' => $express['OrderCode'],
                 ];
             }
 
@@ -337,32 +312,29 @@ class KdniaoAdapter implements AdapterInterface
         return $tracesDatas;
     }
 
-
-
     /**
      * 快递鸟物流推送结果处理
      *
-     * @param boolean $success
-     * @param string $reason
+     * @param  bool  $success
+     * @param  string  $reason
      * @return mixed
      */
     public function getNotifyResponse($data = [])
     {
         $result = [
-            "EBusinessID" => $this->config['ebusiness_id'],
-            "UpdateTime" => date('Y-m-d H:i:s'),
-            "Success" => true,
-            'Reason' => ''
+            'EBusinessID' => $this->config['ebusiness_id'],
+            'UpdateTime' => date('Y-m-d H:i:s'),
+            'Success' => true,
+            'Reason' => '',
         ];
 
         return $result;
     }
 
-
     /**
      * 格式化发货人信息
      *
-     * @param array $paramsSender
+     * @param  array  $paramsSender
      * @return array
      */
     private function formatSender($paramsSender)
@@ -379,11 +351,10 @@ class KdniaoAdapter implements AdapterInterface
         return $sender;
     }
 
-
     /**
      * 格式化接收人信息
      *
-     * @param array $paramsReceiver
+     * @param  array  $paramsReceiver
      * @return array
      */
     private function formatReceiver($paramsReceiver)
@@ -397,15 +368,14 @@ class KdniaoAdapter implements AdapterInterface
             'ExpAreaName' => $paramsReceiver['area'] ?? '',
             'Address' => $paramsReceiver['address'] ?? '',
         ];
+
         return $receiver;
     }
-
-
 
     /**
      * 格式化包裹信息
      *
-     * @param array $params
+     * @param  array  $params
      * @return array
      */
     private function formatCargo($params)
@@ -439,9 +409,6 @@ class KdniaoAdapter implements AdapterInterface
         return compact('quantity', 'weight', 'volume', 'commodity');
     }
 
-
-
-
     /**
      * 格式化微信下单接口响应值
      */
@@ -456,18 +423,16 @@ class KdniaoAdapter implements AdapterInterface
                 'shipper_code' => $result['Order']['ShipperCode'],          // 快递公司编号;
                 'logistic_code' => $result['Order']['LogisticCode'],        // 快递单号;
             ],
-            'original_result' => $result
+            'original_result' => $result,
         ];
 
         return $response;
     }
 
-
-
     /**
      * 处理物流轨迹返回结果
      *
-     * @param array $data
+     * @param  array  $data
      * @return array
      */
     protected function formatTraces($data)
@@ -491,5 +456,4 @@ class KdniaoAdapter implements AdapterInterface
 
         return compact('status', 'status_text', 'traces');
     }
-
 }

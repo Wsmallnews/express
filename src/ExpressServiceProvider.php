@@ -92,7 +92,7 @@ class ExpressServiceProvider extends PackageServiceProvider
     protected function getAssetPackageName(): ?string
     {
         return 'wsmallnews/express';
-    } 
+    }
 
     /**
      * @return array<Asset>

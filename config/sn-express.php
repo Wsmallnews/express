@@ -5,7 +5,6 @@ return [
 
     'default' => env('SN_EXPRESS_DEFAULT', 'kdniao'),
 
-
     'expresses' => [
         'kdniao' => [
             'driver' => 'kdniao',
@@ -34,12 +33,12 @@ return [
             'driver' => 'wechat',
         ],
         'manual' => [
-            'driver' => 'manual'
+            'driver' => 'manual',
         ],
         'thinkapi' => [
             'driver' => 'thinkapi',
-            'app_code' => '123456789'
+            'app_code' => '123456789',
         ],
 
-    ]
+    ],
 ];

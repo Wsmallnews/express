@@ -11,7 +11,6 @@ use Wsmallnews\Express\Exceptions\ExpressException;
 
 class ThinkapiAdapter implements AdapterInterface
 {
-
     public $status = [
         '1' => 'noinfo',
         '2' => 'transport',
@@ -22,45 +21,33 @@ class ThinkapiAdapter implements AdapterInterface
         '7' => 'invalid',
         '8' => 'timeout',
         '9' => 'fail',
-        '10' => 'back'
+        '10' => 'back',
     ];
-
 
     protected $uri = 'https://api.topthink.com';
 
-
     /**
      * 配置数组
-     *
-     * @var array
      */
     public array $config = [];
-
 
     public function __construct(array $config = [])
     {
         $this->config = $config;
     }
 
-
-
     /**
      * 获取当前驱动名
-     *
-     * @return string
      */
     public function getType(): string
     {
         return 'thinkapi';
     }
 
-
-
     /**
      * 查询物流轨迹
      *
-     * @param array $params
-     * @return array
+     * @param  array  $params
      */
     public function query($params): array
     {
@@ -74,7 +61,7 @@ class ThinkapiAdapter implements AdapterInterface
             'appCode' => $this->config['app_code'],
             'com' => 'auto',
             'nu' => $params['express_no'],
-            'phone' => substr($mobile, 7)
+            'phone' => substr($mobile, 7),
         ];
 
         $result = $this->request('get', $this->uri . '/express/query', [
@@ -83,6 +70,7 @@ class ThinkapiAdapter implements AdapterInterface
 
         if (isset($result['code']) && $result['code'] != 0) {
             $msg = $result['data']['msg'] ?? ($result['message'] ?? '');
+
             throw new ExpressException($msg);
         }
 
@@ -94,7 +82,7 @@ class ThinkapiAdapter implements AdapterInterface
         // 格式化结果
         $tracesData = $this->formatTraces([
             'status' => $status,
-            'traces' => $traces
+            'traces' => $traces,
         ]);
 
         $tracesData['express_code'] = $params['express_code'];
@@ -103,13 +91,10 @@ class ThinkapiAdapter implements AdapterInterface
         return $tracesData;
     }
 
-
-
     /**
      * 发货
      *
-     * @param array $params
-     * @return array
+     * @param  array  $params
      */
     public function send($params): array
     {
@@ -117,7 +102,7 @@ class ThinkapiAdapter implements AdapterInterface
         $express_code = $params['express_code'] ?? '';
         $express_no = $params['express_no'] ?? '';
 
-        if (!$express_name || !$express_code || !$express_no) {
+        if (! $express_name || ! $express_code || ! $express_no) {
             throw new ExpressException('请填写正确的快递单号');
         }
 
@@ -125,18 +110,15 @@ class ThinkapiAdapter implements AdapterInterface
             'express_name' => $express_name,
             'express_code' => $express_code,
             'express_no' => $express_no,
-            'ext' => []
+            'ext' => [],
         ];
     }
-
-
 
     /**
      * 取消发货
      *
-     * @param \think\Model|array $package
-     * @param array $params
-     * @return boolean
+     * @param  \think\Model|array  $package
+     * @param  array  $params
      */
     public function cancel($package, $params): bool
     {
@@ -145,14 +127,11 @@ class ThinkapiAdapter implements AdapterInterface
         return true;
     }
 
-
-
     /**
      * 修改物流发货
      *
-     * @param \think\Model|array $package
-     * @param array $params
-     * @return array
+     * @param  \think\Model|array  $package
+     * @param  array  $params
      */
     public function change($package, $params): array
     {
@@ -160,7 +139,7 @@ class ThinkapiAdapter implements AdapterInterface
         $express_code = $params['express_code'] ?? '';
         $express_no = $params['express_no'] ?? '';
 
-        if (!$express_name || !$express_code || !$express_no) {
+        if (! $express_name || ! $express_code || ! $express_no) {
             throw new ExpressException('请填写正确的快递单号');
         }
 
@@ -168,16 +147,14 @@ class ThinkapiAdapter implements AdapterInterface
             'express_name' => $express_name,
             'express_code' => $express_code,
             'express_no' => $express_no,
-            'ext' => []
+            'ext' => [],
         ];
     }
-
 
     /**
      * 物流轨迹订阅
      *
-     * @param array $params
-     * @return boolean
+     * @param  array  $params
      */
     public function subscribe($params): bool
     {
@@ -186,12 +163,10 @@ class ThinkapiAdapter implements AdapterInterface
         return true;
     }
 
-
     /**
      * 轨迹推送通知信息处理
      *
-     * @param array $message
-     * @return array
+     * @param  array  $message
      */
     public function notifyTraces($message): array
     {
@@ -200,12 +175,11 @@ class ThinkapiAdapter implements AdapterInterface
         return [];
     }
 
-
     /**
      * 物流推送结果处理
      *
-     * @param boolean $success
-     * @param string $reason
+     * @param  bool  $success
+     * @param  string  $reason
      * @return mixed
      */
     public function getNotifyResponse($data = [])
@@ -215,12 +189,10 @@ class ThinkapiAdapter implements AdapterInterface
         return $result;
     }
 
-
-
     /**
      * 处理返回结果
      *
-     * @param array $data
+     * @param  array  $data
      * @return array
      */
     protected function formatTraces($data)
@@ -248,9 +220,6 @@ class ThinkapiAdapter implements AdapterInterface
         return compact('status', 'status_text', 'traces');
     }
 
-
-
-
     /**
      * 一般 微信接口请求
      */
@@ -273,5 +242,4 @@ class ThinkapiAdapter implements AdapterInterface
 
         return $result;
     }
-
 }

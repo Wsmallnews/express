@@ -2,18 +2,13 @@
 
 namespace Wsmallnews\Express;
 
-use Wsmallnews\Express\Adapters\{
-    KdniaoAdapter,
-    ManualAdapter,
-    ThinkapiAdapter,
-    WechatAdapter
-};
+use Wsmallnews\Express\Adapters\KdniaoAdapter;
+use Wsmallnews\Express\Adapters\ManualAdapter;
+use Wsmallnews\Express\Adapters\WechatAdapter;
 use Wsmallnews\Express\Exceptions\ExpressException;
 
 class Express
 {
-
-
     /**
      * The application instance.
      *
@@ -35,13 +30,10 @@ class Express
      */
     protected $customCreators = [];
 
-
     public function __construct($app)
     {
         $this->app = $app;
     }
-
-
 
     /**
      * 获取一个 driver 实例
@@ -53,7 +45,6 @@ class Express
     {
         return $this->expresser($name);
     }
-
 
     /**
      * 获取一个 driver 实例
@@ -68,8 +59,6 @@ class Express
         return $this->drivers[$name] = $this->get($name);
     }
 
-
-
     /**
      * 尝试从缓存中获取 driver 实例
      *
@@ -80,7 +69,6 @@ class Express
     {
         return $this->drivers[$name] ?? $this->resolve($name);
     }
-
 
     /**
      * Resolve driver
@@ -107,7 +95,7 @@ class Express
 
         $driverMethod = 'create' . ucfirst($name) . 'Driver';
 
-        if (!method_exists($this, $driverMethod)) {
+        if (! method_exists($this, $driverMethod)) {
             throw new ExpressException("驱动 [{$name}] 不支持.");
         }
 
@@ -117,7 +105,6 @@ class Express
     /**
      * Call a custom driver creator.
      *
-     * @param  array  $config
      * @return Sender
      */
     protected function callCustomCreator(array $config)
@@ -128,7 +115,6 @@ class Express
     /**
      * 创建一个 wechat 发货实例
      *
-     * @param  array  $config
      * @return Sender
      */
     public function createWechatDriver(array $config)
@@ -138,11 +124,9 @@ class Express
         return new Sender($adapter);
     }
 
-
     /**
      * 创建一个 wechat 发货实例
      *
-     * @param  array  $config
      * @return Sender
      */
     public function createKdniaoDriver(array $config)
@@ -152,12 +136,9 @@ class Express
         return new Sender($adapter);
     }
 
-
-
     /**
      * 创建一个 手动发货实例
      *
-     * @param  array  $config
      * @return Sender
      */
     public function createManualDriver(array $config)
@@ -166,8 +147,6 @@ class Express
 
         return new Sender($adapter);
     }
-
-
 
     /**
      * Get the default driver name.
@@ -178,7 +157,6 @@ class Express
     {
         return $this->app['config']['sn-express.default'];
     }
-
 
     /**
      * Get the filesystem connection configuration.

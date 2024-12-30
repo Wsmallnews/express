@@ -12,7 +12,6 @@ use Wsmallnews\Express\Exceptions\ExpressException;
 
 class WechatAdapter implements AdapterInterface
 {
-
     public $status = [
         '0' => 'noinfo',
         '100001' => 'collect',
@@ -26,14 +25,10 @@ class WechatAdapter implements AdapterInterface
         '400002' => 'difficulty',
     ];
 
-
     /**
      * 配置数组
-     *
-     * @var array
      */
     public array $config = [];
-
 
     /**
      * 微信物流快递服务
@@ -46,28 +41,21 @@ class WechatAdapter implements AdapterInterface
     {
         $this->config = $config;
 
-        $this->service = new WechatDeliveryService();
+        $this->service = new WechatDeliveryService;
     }
-
-
 
     /**
      * 获取当前驱动名
-     *
-     * @return string
      */
     public function getType(): string
     {
         return 'wechat';
     }
 
-
-
     /**
      * 查询物流轨迹
      *
-     * @param array $params
-     * @return array
+     * @param  array  $params
      */
     public function query($params): array
     {
@@ -94,13 +82,10 @@ class WechatAdapter implements AdapterInterface
         return $tracesData;
     }
 
-
-
     /**
      * 发货
      *
-     * @param array $params
-     * @return array
+     * @param  array  $params
      */
     public function send($params): array
     {
@@ -123,7 +108,7 @@ class WechatAdapter implements AdapterInterface
             'custom_remark' => $params['remark'] ?? ($baseInfo['remark'] ?? '贵重物品，小心轻放'),  // 备注
             'service' => [
                 'service_type' => $params['service_type'] ?? '',
-                'service_name' => $params['service_name'] ?? ''
+                'service_name' => $params['service_name'] ?? '',
             ],
             'expect_time' => strtotime($params['expect_time']) ?? 0,                 // 如果是下顺丰散单，则必传此字段: 顺丰必须传。 预期的上门揽件时间，0表示已事先约定取件时间；否则请传预期揽件时间戳
             'take_mode' => 0,
@@ -152,7 +137,7 @@ class WechatAdapter implements AdapterInterface
 
         // 保价信息
         $insured = [
-            'use_insured' => 0
+            'use_insured' => 0,
         ];
         $wechatParams['insured'] = $insured;
 
@@ -162,14 +147,11 @@ class WechatAdapter implements AdapterInterface
         return $this->formatSendResponse($params, $result);
     }
 
-
-
     /**
      * 取消发货
      *
-     * @param \think\Model|array $package
-     * @param array $params
-     * @return boolean
+     * @param  \think\Model|array  $package
+     * @param  array  $params
      */
     public function cancel($package, $params): bool
     {
@@ -201,31 +183,24 @@ class WechatAdapter implements AdapterInterface
         return true;
     }
 
-
-
     /**
      * 修改物流发货
      *
-     * @param \think\Model|array $package
-     * @param array $params
-     * @return array
+     * @param  \think\Model|array  $package
+     * @param  array  $params
      */
     public function change($package, $params): array
     {
         throw new ExpressException('该发货单已被推送第三方平台，请取消后重新发货');
-
         // @sn todo 后续这里可以先调用 cancel, 然后在调用 send
 
         return [];
     }
 
-
-
     /**
      * 物流轨迹订阅
      *
-     * @param array $params
-     * @return boolean
+     * @param  array  $params
      */
     public function subscribe($params): bool
     {
@@ -234,12 +209,10 @@ class WechatAdapter implements AdapterInterface
         return true;
     }
 
-
     /**
      * 轨迹推送通知信息处理
      *
-     * @param array $message
-     * @return array
+     * @param  array  $message
      */
     public function notifyTraces($message): array
     {
@@ -257,18 +230,17 @@ class WechatAdapter implements AdapterInterface
         $tracesData['express_no'] = $waybill_id;
         $tracesData['extra'] = [
             // 包裹额外信息，更加精确查询包裹时用，和 发货时候 formatSendResponse 方法组装的 ext 字段相对应
-            'unique_id' => $order_id
+            'unique_id' => $order_id,
         ];
 
         return [$tracesData];       // 默认都返回多物流单模式
     }
 
-
     /**
      * 物流推送结果处理
      *
-     * @param boolean $success
-     * @param string $reason
+     * @param  bool  $success
+     * @param  string  $reason
      * @return mixed
      */
     public function getNotifyResponse($data = [])
@@ -278,11 +250,10 @@ class WechatAdapter implements AdapterInterface
         return $result;
     }
 
-
     /**
      * 格式化发货人信息
      *
-     * @param array $paramsSender
+     * @param  array  $paramsSender
      * @return array
      */
     private function formatSender($paramsSender)
@@ -299,11 +270,10 @@ class WechatAdapter implements AdapterInterface
         return $sender;
     }
 
-
     /**
      * 格式化接收人信息
      *
-     * @param array $paramsReceiver
+     * @param  array  $paramsReceiver
      * @return array
      */
     private function formatReceiver($paramsReceiver)
@@ -317,15 +287,14 @@ class WechatAdapter implements AdapterInterface
             'area' => $paramsReceiver['area'] ?? '',
             'address' => $paramsReceiver['address'] ?? '',
         ];
+
         return $receiver;
     }
-
-
 
     /**
      * 格式化接收人信息
      *
-     * @param array $paramsCargo
+     * @param  array  $paramsCargo
      * @return array
      */
     private function formatCargo($paramsCargo)
@@ -354,12 +323,10 @@ class WechatAdapter implements AdapterInterface
         return $cargo;
     }
 
-
-
     /**
      * 格式化商品
      *
-     * @param array $params
+     * @param  array  $params
      * @return array
      */
     private function formatShop($params)
@@ -375,7 +342,7 @@ class WechatAdapter implements AdapterInterface
             $detail = [
                 'goods_name' => $car['cargo_title'],
                 'goods_img_url' => cdnurl($car['cargo_image'], true),
-                'goods_desc' => $car['cargo_num'] . '件 * ' . $car['cargo_weight'] . 'KG'
+                'goods_desc' => $car['cargo_num'] . '件 * ' . $car['cargo_weight'] . 'KG',
             ];
 
             $detailList[] = $detail;
@@ -384,9 +351,6 @@ class WechatAdapter implements AdapterInterface
 
         return $shop;
     }
-
-
-
 
     /**
      * 格式化微信下单接口响应值
@@ -410,17 +374,16 @@ class WechatAdapter implements AdapterInterface
                 'delivery_id' => $params['delivery_id'],
                 'biz_id' => $params['biz_id'],
             ],
-            'original_result' => $result
+            'original_result' => $result,
         ];
 
         return $response;
     }
 
-
     /**
      * 处理物流轨迹返回结果
      *
-     * @param array $data
+     * @param  array  $data
      * @return array
      */
     protected function formatTraces($actions, $field_type = 'studly')
@@ -443,7 +406,7 @@ class WechatAdapter implements AdapterInterface
                 'content' => $action[$action_msg_field],
                 'status' => $currentStatus,
                 'status_text' => $statusList[$currentStatus] ?? '',
-                'change_date' => date('Y-m-d H:i:s', (int)$action[$action_time_field]),
+                'change_date' => date('Y-m-d H:i:s', (int) $action[$action_time_field]),
             ];
 
             $traces[] = $trace;

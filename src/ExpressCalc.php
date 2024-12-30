@@ -4,23 +4,16 @@ declare(strict_types=1);
 
 namespace addons\estore\package\delivery\express;
 
-use addons\estore\package\order\{
-    OrderRocket
-};
-use addons\estore\package\delivery\{
-    contract\CalcInterface,
-    exception\DeliveryException,
-    model\Delivery as DeliveryModel,
-    model\Express as DeliveryExpressModel
-};
-
+use addons\estore\package\delivery\contract\CalcInterface;
+use addons\estore\package\delivery\exception\DeliveryException;
+use addons\estore\package\delivery\model\Delivery as DeliveryModel;
+use addons\estore\package\order\OrderRocket;
 
 /**
  * 在线物流
  */
 class ExpressCalc implements CalcInterface
 {
-
     /**
      * 配送信息
      */
@@ -39,16 +32,12 @@ class ExpressCalc implements CalcInterface
 
     private $rocket = null;
 
-    public function __construct()
-    {
-    }
-
+    public function __construct() {}
 
     /**
      * 设置 products
      *
-     * @param array $products
-     * @return self
+     * @param  array  $products
      */
     public function setProducts($products): self
     {
@@ -57,12 +46,8 @@ class ExpressCalc implements CalcInterface
         return $this;
     }
 
-
     /**
      * 设置 rocket
-     *
-     * @param OrderRocket $rocket
-     * @return self
      */
     public function setRocket(OrderRocket $rocket): self
     {
@@ -70,7 +55,6 @@ class ExpressCalc implements CalcInterface
 
         return $this;
     }
-
 
     /**
      * 计算所有快递物流的商品的配送费，并分配到每个商品上
@@ -81,7 +65,7 @@ class ExpressCalc implements CalcInterface
     {
         $userAddress = $this->rocket->getRadar('user_address');
 
-        if (!$userAddress) {
+        if (! $userAddress) {
             return $this->delivery_amount;
         }
 
@@ -98,18 +82,13 @@ class ExpressCalc implements CalcInterface
         return $this->delivery_amount;
     }
 
-
     /**
      * 获取计算过运费的 products 列表
-     *
-     * @return array
      */
     public function getDeliveryProducts(): array
     {
         return $this->products;
     }
-
-
 
     private function deliveryInit($products, $userAddress)
     {
@@ -140,14 +119,11 @@ class ExpressCalc implements CalcInterface
         return $products;
     }
 
-
-
-
     /**
      * 获取最终匹配的 express 规则
      *
-     * @param string $delivery_id
-     * @param object $userAddress
+     * @param  string  $delivery_id
+     * @param  object  $userAddress
      * @return object
      */
     private function getFinalExpresses($delivery_id, $userAddress)
@@ -167,11 +143,10 @@ class ExpressCalc implements CalcInterface
         return $finalExpress;
     }
 
-
     /**
      * 当前配送的 express 模板
      *
-     * @param string $delivery_id
+     * @param  string  $delivery_id
      * @return object
      */
     private function getDelivery($delivery_id)
@@ -179,13 +154,11 @@ class ExpressCalc implements CalcInterface
         return DeliveryModel::show()->with(['expresses'])->where('type', 'express')->where('id', $delivery_id)->findOrFail();
     }
 
-
-
     /**
      * 匹配配送规则
      *
-     * @param \Illuminate\Support\Collection $expresses
-     * @param object $userAddress
+     * @param  \Illuminate\Support\Collection  $expresses
+     * @param  object  $userAddress
      * @return object
      */
     private function pairExpress($expresses, $userAddress)
@@ -194,16 +167,19 @@ class ExpressCalc implements CalcInterface
         foreach ($expresses as $key => $express) {
             if (strpos($express->district_ids, strval($userAddress->district_id)) !== false) {
                 $finalExpress = $express;
+
                 break;
             }
 
             if (strpos($express->city_ids, strval($userAddress->city_id)) !== false) {
                 $finalExpress = $express;
+
                 break;
             }
 
             if (strpos($express->province_ids, strval($userAddress->province_id)) !== false) {
                 $finalExpress = $express;
+
                 break;
             }
         }
@@ -214,8 +190,6 @@ class ExpressCalc implements CalcInterface
 
         return $finalExpress;
     }
-
-
 
     /**
      * 运费聚合计算，然后加权平均分配到商品上
@@ -231,12 +205,12 @@ class ExpressCalc implements CalcInterface
             $weight = 0;
             foreach ($deliveryInfo['buy_infos'] as $k => $deliveryBuyInfo) {
                 $buy_num += $deliveryBuyInfo['product_num'];
-                $weight = bcadd((string)$weight, $deliveryBuyInfo['weight'], 2);
+                $weight = bcadd((string) $weight, $deliveryBuyInfo['weight'], 2);
             }
             // 聚合原始运费
             $current_delivery_amount = $this->calcAmount($finalExpress, [
                 'buy_num' => $buy_num,
-                'weight' => $weight
+                'weight' => $weight,
             ]);
 
             $deliveryInfo['current_delivery_amount'] = $current_delivery_amount;        // 记录当前运费模板下商品的运费
@@ -249,49 +223,47 @@ class ExpressCalc implements CalcInterface
                 $deliveryInfo['buy_infos'] = $this->equalAmount($current_delivery_amount, $deliveryInfo['buy_infos'], [
                     'buy_num' => $buy_num,
                     'weight' => $weight,
-                    'final_express' => $finalExpress
+                    'final_express' => $finalExpress,
                 ]);
             }
         }
     }
 
-
-
     /**
      * 根据匹配的规则计算费用
      *
-     * @param object $finalExpress
-     * @param array $data
+     * @param  object  $finalExpress
+     * @param  array  $data
      * @return string
      */
     private function calcAmount($finalExpress, $data)
     {
         // 初始费用
-        $delivery_amount = (string)$finalExpress->first_price;
+        $delivery_amount = (string) $finalExpress->first_price;
 
         if ($finalExpress['type'] == 'number') {
             // 按件计算
             if ($finalExpress->additional_num && $finalExpress->additional_price) {
                 // 首件之后剩余件数
-                $surplus_num = bcsub((string)$data['buy_num'], (string)$finalExpress->first_num);
+                $surplus_num = bcsub((string) $data['buy_num'], (string) $finalExpress->first_num);
 
                 // 多出的计量
                 $additional_mul = ceil(($surplus_num / $finalExpress->additional_num));
                 if ($additional_mul > 0) {
-                    $additional_delivery_amount = bcmul((string)$additional_mul, (string)$finalExpress->additional_price, 2);
-                    $delivery_amount = bcadd((string)$delivery_amount, (string)$additional_delivery_amount, 2);
+                    $additional_delivery_amount = bcmul((string) $additional_mul, (string) $finalExpress->additional_price, 2);
+                    $delivery_amount = bcadd((string) $delivery_amount, (string) $additional_delivery_amount, 2);
                 }
             }
         } else {
             // 按重量计算
             if ($finalExpress->additional_num && $finalExpress->additional_price) {
                 // 首重之后剩余重量
-                $surplus_num = bcsub((string)$data['weight'], (string)$finalExpress->first_num, 3);
+                $surplus_num = bcsub((string) $data['weight'], (string) $finalExpress->first_num, 3);
 
                 // 多出的计量
                 $additional_mul = ceil(($surplus_num / $finalExpress->additional_num));
                 if ($additional_mul > 0) {
-                    $additional_delivery_amount = bcmul((string)$additional_mul, $finalExpress->additional_price, 2);
+                    $additional_delivery_amount = bcmul((string) $additional_mul, $finalExpress->additional_price, 2);
                     $delivery_amount = bcadd($delivery_amount, $additional_delivery_amount, 2);
                 }
             }
@@ -300,15 +272,12 @@ class ExpressCalc implements CalcInterface
         return $delivery_amount;
     }
 
-
-
-
     /**
      * 一个运费模板下面的运费，加权平均到商品 （最后一个商品，分摊剩余的所有配送费）
      *
-     * @param string $delivery_amount
-     * @param array $deliveryBuyInfos
-     * @param array $data
+     * @param  string  $delivery_amount
+     * @param  array  $deliveryBuyInfos
+     * @param  array  $data
      * @return void
      */
     private function equalAmount($delivery_amount, $deliveryBuyInfos, $data)
@@ -329,17 +298,17 @@ class ExpressCalc implements CalcInterface
                 if ($finalExpress['type'] == 'number') {
                     // 按件
                     if ($buy_num) {          // 字符串 0.00 是 true, 这里转下类型在判断
-                        $scale = bcdiv((string)$deliveryBuyInfo['product_num'], (string)$buy_num, 6);
+                        $scale = bcdiv((string) $deliveryBuyInfo['product_num'], (string) $buy_num, 6);
                     }
 
-                    $current_delivery_amount = bcmul((string)$delivery_amount, (string)$scale, 2);
+                    $current_delivery_amount = bcmul((string) $delivery_amount, (string) $scale, 2);
                 } else {
                     // 按重量
                     if (floatval($weight)) {
-                        $scale = bcdiv((string)$deliveryBuyInfo['weight'], (string)$weight, 6);
+                        $scale = bcdiv((string) $deliveryBuyInfo['weight'], (string) $weight, 6);
                     }
 
-                    $current_delivery_amount = bcmul((string)$delivery_amount, (string)$scale, 2);
+                    $current_delivery_amount = bcmul((string) $delivery_amount, (string) $scale, 2);
                 }
             }
 
@@ -351,12 +320,10 @@ class ExpressCalc implements CalcInterface
         return $deliveryBuyInfos;
     }
 
-
-
     /**
      * 将运费分配到商品上
      *
-     * @param array $products
+     * @param  array  $products
      * @return array
      */
     private function reCalcProductDelivery($products)
@@ -371,6 +338,7 @@ class ExpressCalc implements CalcInterface
                     ) {
                         $buyInfo['delivery_amount'] = $deliveryBuyInfo['delivery_amount'];
                         $buyInfo['delivery_id'] = $delivery_id;
+
                         break;
                     }
                 }

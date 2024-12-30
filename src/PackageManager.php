@@ -4,38 +4,33 @@ declare(strict_types=1);
 
 namespace addons\estore\package\delivery\express;
 
-use \think\Collection;
-use addons\estore\package\delivery\{
-    exception\DeliveryException,
-    model\ExpressPackage as ExpressPackageModel,
-    model\ExpressPackageLog as ExpressPackageLogModel
-};
-use addons\estore\package\support\{
-    traits\HasScopeType,
-    traits\HasTableType,
-    traits\HasQuery,
-};
+use addons\estore\package\delivery\model\ExpressPackage as ExpressPackageModel;
+use addons\estore\package\delivery\model\ExpressPackageLog as ExpressPackageLogModel;
+use addons\estore\package\support\traits\HasQuery;
+use addons\estore\package\support\traits\HasScopeType;
+use addons\estore\package\support\traits\HasTableType;
+use think\Collection;
 
 class PackageManager
 {
-
+    use HasQuery;
     use HasScopeType;
     use HasTableType;
-    use HasQuery;
 
-    
     // 包裹信息
     public $express_name = null;
+
     public $express_code = null;
+
     public $express_no = null;
-    
+
     public $model = null;
 
     public function __construct()
     {
         $this->model = function () {
             // 默认加上 scopeType 条件
-            $query = (new ExpressPackageModel())
+            $query = (new ExpressPackageModel)
                 ->scopeInfo($this->getScopeType(), $this->getStoreId());
 
             if ($this->getTableType()) {
@@ -51,12 +46,10 @@ class PackageManager
         };
     }
 
-
-
     /**
      * 获取指定 id 的包裹
      *
-     * @param integer $id
+     * @param  int  $id
      * @return \think\Model
      */
     public function getPackage($id)
@@ -64,11 +57,10 @@ class PackageManager
         return $this->getQuery()->where('id', $id)->find();
     }
 
-
     /**
      * 获取 tableInfo 相关的所有包裹
      *
-     * @param array $tableInfo
+     * @param  array  $tableInfo
      * @return array|Collection
      */
     public function getPackageByTableInfo($tableInfo)
@@ -76,15 +68,12 @@ class PackageManager
         return $this->getQuery()->tableInfo($tableInfo['table_type'], $tableInfo['table_id'])->select();
     }
 
-
-
-
     /**
      * 根据快递信息 获取包裹
      *
-     * @param string $express_code
-     * @param string $express_no
-     * @param array $extra
+     * @param  string  $express_code
+     * @param  string  $express_no
+     * @param  array  $extra
      * @return \think\Model
      */
     public function getPackageByExpressInfo($express_code, $express_no, $extra)
@@ -95,16 +84,13 @@ class PackageManager
         foreach ($extra as $field => $value) {
             $query = $query->where('ext$.' . $field, $value);
         }
-        
+
         return $query->find();
     }
-
-
 
     /**
      * 设置快递信息
      *
-     * @param array $info
      * @return self
      */
     public function setExpressInfo(array $info = [])
@@ -116,22 +102,21 @@ class PackageManager
         return $this;
     }
 
-
     /**
      * 添加包裹信息
      *
-     * @param array $options
+     * @param  array  $options
      * @return \think\Model
      */
     public function save($options = [])
     {
-        $expressPackage = new ExpressPackageModel();
+        $expressPackage = new ExpressPackageModel;
         $expressPackage->user_id = $options['user_id'] ?? 0;
         $expressPackage->scope_type = $this->getScopeType();
         $expressPackage->store_id = $this->getStoreId();
         $expressPackage->table_type = $this->getTableType();
         $expressPackage->table_id = $this->getTableId();
-        
+
         $expressPackage->express_name = $this->express_name;
         $expressPackage->express_code = $this->express_code;
         $expressPackage->express_no = $this->express_no;
@@ -143,11 +128,10 @@ class PackageManager
         return $expressPackage;
     }
 
-
     /**
      * 编辑包裹信息
      *
-     * @param array $options
+     * @param  array  $options
      * @return \think\Model
      */
     public function update($expressPackage, $options = [])
@@ -158,7 +142,7 @@ class PackageManager
         }
 
         $expressPackage->user_id = $options['user_id'] ?? $expressPackage->user_id;
-        
+
         $expressPackage->express_name = $this->express_name;
         $expressPackage->express_code = $this->express_code;
         $expressPackage->express_no = $this->express_no;
@@ -170,13 +154,11 @@ class PackageManager
         return $expressPackage;
     }
 
-
-
     /**
      * 更新包裹轨迹
      *
-     * @param array|\think\Model $expressPackage
-     * @param array $tracesData
+     * @param  array|\think\Model  $expressPackage
+     * @param  array  $tracesData
      * @return \think\Model
      */
     public function updateStatusTraces($expressPackage, $tracesData)
@@ -192,13 +174,11 @@ class PackageManager
         return $expressPackage;
     }
 
-
-
     /**
      * 更新物流信息
      *
-     * @param array|\think\Model $expressPackage
-     * @param array $traces
+     * @param  array|\think\Model  $expressPackage
+     * @param  array  $traces
      * @return void
      */
     protected function syncTraces($expressPackage, $traces)
@@ -214,7 +194,7 @@ class PackageManager
 
         // 增加包裹记录
         foreach ($traces as $k => $trace) {
-            $log = new ExpressPackageLogModel();
+            $log = new ExpressPackageLogModel;
             $log->express_package_id = $expressPackage->id;
             $log->content = $trace['content'];
             $log->change_date = $trace['change_date'];
