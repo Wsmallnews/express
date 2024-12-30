@@ -92,7 +92,7 @@ class ExpressServiceProvider extends PackageServiceProvider
     protected function getAssetPackageName(): ?string
     {
         return 'wsmallnews/express';
-    }
+    } 
 
     /**
      * @return array<Asset>
@@ -101,8 +101,8 @@ class ExpressServiceProvider extends PackageServiceProvider
     {
         return [
             // AlpineComponent::make('express', __DIR__ . '/../resources/dist/components/express.js'),
-            Css::make('express-styles', __DIR__ . '/../resources/dist/express.css'),
-            Js::make('express-scripts', __DIR__ . '/../resources/dist/express.js'),
+            // Css::make('express-styles', __DIR__ . '/../resources/dist/express.css'),
+            // Js::make('express-scripts', __DIR__ . '/../resources/dist/express.js'),
         ];
     }
 
